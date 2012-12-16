@@ -2,50 +2,33 @@
 import ply.lex as lex
 
 tokens = (
-    '4DIGIT',
-    '2DIGIT',
     'NUMBER', 
-    'TASKNAME',
-    'MILESTONENAME',
     'SPACE',
     'TAB',
-    'COMMENT',
+    'SHARP',
     'SLASH',
+    'STAR',
     'TERM',
     'PERCENT',
+    'LBRAC',
+    'RBRAC',
+    'PRINTABLE',
 )
 
 t_SPACE = r'[ ]+'
 t_TAB = r'\t'
-t_COMMENT = r'\#.*'
+t_SHARP = r'\#'
+t_PERCENT = r'%'
 t_SLASH = r'/'
+t_STAR = r'\*'
+t_PRINTABLE = r'[\S]+'
 
-def t_TASKNAME(t):
-    r'\[([^\]]+)\]'
-    t.value = t.value.strip().strip('[').rstrip(']')
+def t_LBRAC(t):
+    r'\['
     return t
 
-def t_MILESTONENAME(t):
-    r'\*([^\*]+)\*'
-    t.value = t.value.strip().strip('*').rstrip('*')
-    return t
-
-def t_TERM(t):
-    r'\d+[whd]'
-    return t
-
-def t_PERCENT(t):
-    r'1?\d{0,2}%'
-    return t
-
-def t_4DIGIT(t):
-    r'\d{4}'
-    t.value = int(t.value)
-    return t
-
-def t_2DIGIT(t):
-    r'\d{2}'
-    t.value = int(t.value)
+def t_RBRAC(t):
+    r'\]'
     return t
 
 def t_NUMBER(t):
