@@ -1,69 +1,82 @@
 #!/usr/bin/env python
-# encoding=utf-8
-
-import ply
+import ply.lex as lex
 
 tokens = (
-    'NAME', 'NUMBER', '4DIGIT', '2DIGIT',
-    'LPAREN', 'RPAREN', 'AT', 'SLASH', 'PERCENT', 'ARROW', 'WEEK', 'DAY',
-    'HOUR',
+    'TASKNAME',
+    'MILESTONENAME',
+    'SPACE',
+    'TAB',
+    'TERM',
+    'YEARMONTHDAY',
+    'MONTHDAY',
+    'DONE',
+    'COMMENT',
+    'NEWLINE',
 )
 
-# Tokens
-t_LPAREN = r'\['
-t_RPAREN = r'\]'
-t_AT = r'@'
-t_SLASH = r'/'
-t_PERCENT = r'%'
-t_WEEK = r'w'
-t_DAY = r'd'
-t_HOUR = r'h'
-t_ARROW = r'->'
-t_NAME = r'[^\[\]]+'
-t_4DIGIT = r'\d{4}'
-t_2DIGIT = r'\d{2}'
+t_SPACE = r'[ ]+'
+t_TAB = r'\t'
 
-def t_NUMBER(t):
-    r'\d+'
-    t.value = int(t.value)
+
+def t_TASKNAME(t):
+    r'\[[^\]]+\]'
+    t.value = t.value.strip('[').rstrip(']').strip()
+    return t
+
+def t_MILESTONENAME(t):
+    r'\*[^\]]+\*'
+    t.value = t.value.strip('*').rstrip('*').strip()
+    return t
+
+def t_YEARMONTHDAY(t):
+    r'\d{4}/\d{2}/\d{2}'
+    return t
+
+def t_MONTHDAY(t):
+    r'\d{2}/\d{2}'
+    return t
+
+def t_TERM(t):
+    r'\d+[whd]'
+    return t
+
+def t_DONE(t):
+    r'1?\d{0,2}\%'
+    return t
+
+def t_COMMENT(t):
+    r'\#.*'
     return t
 
 def t_newline(t):
     r'\n+'
-    t.lexer.lineno += t.value.count('\n')
+    t.lexer.lineno += len(t.value)
+    t.type = 'NEWLINE'
+    t.value = ''
+    return t
+
 
 def t_error(t):
-    print ("Illegal character '%s'" % t.value[0])
+    print "Illegal character '%s'" % t.value[0]
     t.lexer.skip(1)
 
-import ply.lex as lex
-lex.lex()
+lexer = lex.lex()
 
-def p_task(p):
-    'task : LPAREN NAME RPAREN due'
-    names[p[2]] = p[4]
+# Test
 
-def p_due(p):
-    '''due : NUMBER WEEK 
-                | NUMBER DAY 
-                | NUMBER HOUR'''
-    p[0] = p[1]
+data = '''
+[task 1] 2012/01/23 2w 10%
+    [task 1-1] 02/02 100% # comment 1
+	[task 2] 0%
+# comment 2
+*close beta* 2012/06/06
+'''
 
-def p_taskbody_date(p):
-    'taskbody : 4DIGIT SLASH 2DIGIT SLASH 2DIGIT'
-    p[0] = p[1]
+lexer.input(data)
 
-def p_error(p):
-    if p:
-        print ("Syntax error at '%s'" % p.value)
-    else:
-        print ('Syntax error')
-
-import ply.yacc as yacc
-yacc.yacc()
-
-s  = raw_input('>')
-r = yacc.parse(s)
-if r:
-    print r
+# Tokenize
+while True:
+    tok = lexer.token()
+    if not tok: break
+    print tok.type, tok.value, tok.lineno, tok.lexpos
 
