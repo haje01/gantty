@@ -35,32 +35,48 @@ def p_command_comment(p):
 
 ### task
 def p_command_task(p):
-    '''command : TASKNAME optstart optend optdone optownerlist optcomment'''
+    '''command : TASKNM optstart optend optdone optownerlist optdepend optcomment'''
     print 'command task ', p[1:]
 
 ### optional start
 def p_optstart(p):
     '''optstart : date
                 | empty'''
+    p[0] = p[1]
     print 'optstart ', p[1]
 
 ### optional end
 def p_optend(p):
     '''optend : date
               | empty'''
+    p[0] = p[1]
     print 'optend ', p[1]
 
 ### optional done
 def p_optdone(p):
     '''optdone : PERCENT
                | empty'''
+    p[0] = p[1]
     print 'optdone ', p[1]
 
 ### optional ownerlist
 def p_optownerlist(p):
     '''optownerlist : ownerlist
                     | empty'''
+    p[0] = p[1]
     print 'optownerlist ', p[1]
+
+### optional depend
+def p_optdepend(p):
+    '''optdepend : depend
+                    | empty'''
+    p[0] = p[1]
+    print 'optdepend ', p[1]
+
+def p_depend(p):
+    '''depend : ARROW TASKNM'''
+    p[0] = p[2]
+    print 'depend ', p[1]
 
 ### optional comment
 def p_optcomment(p):
@@ -106,7 +122,7 @@ def test():
 # line comment
 [task 1]
 [task 2] 2012/01/01 @haje01 @lqez # tail comment
-[task 3] 2012/01/01 2w 10% @lqez
+[task 3] 2012/01/01 2w 10% @lqez <- [task 2]
 '''
     print parse(data)
 

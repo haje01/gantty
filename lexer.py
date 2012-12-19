@@ -6,7 +6,7 @@ states = (
 )
 
 tokens = (
-    'TASKNAME',
+    'TASKNM',
     'NEWLINE',
     'YEARMONTHDAY',
     'MONTHDAY',
@@ -14,6 +14,7 @@ tokens = (
     'PERCENT',
     'OWNER',
     'COMMENT',
+    'ARROW',
 )
 
 t_task_YEARMONTHDAY = r'\d{4}/\d{2}/\d{2}'
@@ -22,6 +23,7 @@ t_task_TERM = r'\d+[hdw]'
 t_task_PERCENT = r'1?\d{1,2}%'
 t_task_OWNER = r'@[\S]+'
 t_task_ignore = ' \t'
+t_task_ARROW = r'<-'
 
 def t_COMMENT(t):
     r'\#.*'
@@ -31,9 +33,13 @@ def t_COMMENT(t):
 def t_task_COMMENT(t):
     r'\#.*'
 
-def t_TASKNAME(t):
+def t_TASKNM(t):
     r'\s*\[[^\]]+\]'
     t.lexer.push_state('task')
+    return t
+
+def t_task_TASKNM(t):
+    r'\[[^\]]+\]'
     return t
 
 def t_task_NEWLINE(t):
