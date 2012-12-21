@@ -27,7 +27,7 @@ syn match taskDone contained '\d\+%'
 syn match taskOwner contained '@\S*'
 syn match gntyComment contained "#.*\$" contains=gntyTodo
 syn match gntyComment "#.*" contains=gntyTodo
-syn match taskDep contained "->" nextgroup=taskNameRef skipwhite
+syn match taskDep contained "<-" nextgroup=taskNameRef skipwhite
 syn region subjectName start='<' end='>'
 syn region taskNameRef start='\[' end='\]' nextgroup=taskNameRef skipwhite
 syn region taskNameRef start='\*' end='\*' nextgroup=taskNameRef skipwhite

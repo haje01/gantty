@@ -7,6 +7,7 @@ states = (
 
 tokens = (
     'TASKNM',
+    'MILENM',
     'NEWLINE',
     'YEARMONTHDAY',
     'MONTHDAY',
@@ -34,7 +35,12 @@ def t_task_COMMENT(t):
     r'\#.*'
 
 def t_TASKNM(t):
-    r'\s*\[[^\]]+\]'
+    r'\s*\[\S[^\]]+\S\]'
+    t.lexer.push_state('task')
+    return t
+
+def t_MILENM(t):
+    r'\s*\*\S[^\]]+\S\*'
     t.lexer.push_state('task')
     return t
 
@@ -54,12 +60,14 @@ def t_NEWLINE(t):
     return t
 
 def t_error(t):
-    print 'Illegal character ', t.value[0]
+    # print 'Illegal character ', t.value[0]
     t.lexer.skip(1)
+    return t
 
 def t_task_error(t):
-    print 'Illegal task character ', t.value[0]
+    # print 'Illegal task character ', t.value[0]
     t.lexer.skip(1)
+    return t
 
 lexer = lex.lex()
 
