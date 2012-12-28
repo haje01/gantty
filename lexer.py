@@ -35,12 +35,12 @@ def t_task_COMMENT(t):
     r'\#.*'
 
 def t_TASKNM(t):
-    r'\s*\[\S[^\]]+\S\]'
+    r'[ \t]*\[\S[^\]]+\S\]'
     t.lexer.push_state('task')
     return t
 
 def t_MILENM(t):
-    r'\s*\*\S[^\]]+\S\*'
+    r'[ \t]*\*\S[^\]]+\S\*'
     t.lexer.push_state('task')
     return t
 

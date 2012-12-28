@@ -5,6 +5,9 @@ import types
 from objects import Task, Milestone
 
 tokens = lexer.tokens
+pindent_char = None
+pindent_size = None
+pindent_unit = None
 
 def find_column(input, lexpos):
     last_cr = input.rfind('\n', 0, lexpos)
@@ -20,6 +23,43 @@ def collect_stmts(target, program):
                 collect_stmts(target, stmt)
             elif stmt:
                 target.append(stmt)
+
+def check_indent_consistency(indent):
+    global pindent_char, pindent_unit, pindent_size
+
+    if len(indent) == 0:
+        return
+
+    tab = None
+    space = None
+    indent_char = None
+
+    if indent.find('\t') >= 0:
+        tab = True
+        indent_char = '\t'
+    if indent.find(' ') >= 0:
+        space = True
+        indent_char = ' '
+    if tab and space:
+        return "Space and tab are mixed"
+
+    if not pindent_char:
+        pindent_char = indent_char
+    elif pindent_char != indent_char:
+        return "Different indent character used"
+
+    if indent_char:
+        indent_size = len(indent.split(indent_char)) - 1
+        if not pindent_unit:
+            pindent_unit = indent_size
+        elif indent_size % pindent_unit != 0:
+            return "Inconsistent indent unit"
+        elif indent_size != (pindent_size - pindent_unit) and \
+            indent_size != (pindent_size + pindent_unit) and \
+            indent_size != pindent_size:
+            return "Illegal indent step"
+        pindent_size = indent_size
+    return
 
 def p_program(p):
     '''program : program statement
@@ -70,7 +110,12 @@ def p_command_task(p):
     ownerlist = []
     get_ownerlist(ownerlist, p[5])
     dependnm = p[6]
-    p[0] = Task(tasknm, start, end, done, ownerlist, dependnm)
+    indent = tasknm[0:tasknm.find('[')]
+    ie = check_indent_consistency(indent)
+    if ie:
+		raise Exception("%s : '%s'" % (ie, tasknm))
+    parent = None
+    p[0] = Task(parent, tasknm, start, end, done, ownerlist, dependnm)
 
 ### mile
 def p_command_mile(p):
@@ -171,12 +216,21 @@ def test():
 [task 2] 2012/01/01 @haje01
 [task 3] 2012/01/03 2012/01/05 @haje01 @lqez # tail comment
 [task 4] 2012/01/01 2w 10% @lqez <- [task 3]
-*mileston 1* <- [task 3]
+
+[task 5]
+    [task 5-1] 2012/02/01 4w 30%
+    [task 5-2] 
+        [task 5-2-1] 2012/03/10 
+        [task 5-2-2] 2012/03/20 
+
+[task 6] 2012/04/01 4w @haje01 <- [task 5]
+*mileston 1* <- [task 6]
+    *mileston 1-1*
 '''
     program = parse(data)
     if program:
-        for stmt in program:
-            print stmt.name
+        for task in program:
+            print task
 
 if __name__ == '__main__':
     test()
